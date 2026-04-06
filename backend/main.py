@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from utils import load_model, rule_based_risk, combine_risk, prepare_features
 
 app = FastAPI(
@@ -31,7 +31,8 @@ class TransactionInput(BaseModel):
     device_change: int = Field(..., ge=0, le=1, description="1 when device changed")
     transaction_type: str = Field(..., description="Transaction channel: online, pos, or atm")
 
-    @validator("transaction_type")
+    @field_validator("transaction_type")
+    @classmethod
     def validate_transaction_type(cls, value):
         normalized = value.lower()
         if normalized not in {"online", "pos", "atm"}:
